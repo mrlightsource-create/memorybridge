@@ -161,12 +161,6 @@ export default function App() {
           </p>
           <div className="heroActions">
             <a className="primaryAction" href="#does">See what it does</a>
-            <a className="secondaryAction" href="#faq">Read FAQ</a>
-          </div>
-          <div className="heroProof" aria-label="Product proof points">
-            <span>No Snapchat password</span>
-            <span>Keeps real dates</span>
-            <span>Keeps real places</span>
           </div>
         </div>
       </header>

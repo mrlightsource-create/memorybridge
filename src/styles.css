@@ -188,24 +188,7 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 34px;
-}
-
-.heroProof {
-  color: var(--ink);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 0.9rem;
-  font-weight: 900;
-  gap: 10px;
-}
-
-.heroProof span {
-  background: var(--paper);
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  box-shadow: 4px 4px 0 var(--ink);
-  padding: 8px 12px;
+  margin-bottom: 0;
 }
 
 .introBand,
@@ -852,9 +835,8 @@ details p {
   }
 
   .hero {
-    background-position: calc(100% + 210px) bottom;
-    background-size: 620px auto;
-    min-height: 660px;
+    background-image: none !important;
+    min-height: auto;
   }
 
   h1 {
@@ -867,10 +849,6 @@ details p {
 
   .heroContent {
     padding: 54px 18px 42px;
-  }
-
-  .heroProof {
-    gap: 10px;
   }
 
   .metrics,
