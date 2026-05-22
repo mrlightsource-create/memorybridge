@@ -1,83 +1,74 @@
 import { useMemo, useState } from 'react';
 
-const providers = [
-  { id: 'google_photos', name: 'Google Photos', state: 'Planned' },
-  { id: 'onedrive', name: 'OneDrive', state: 'Planned' },
-  { id: 'google_drive', name: 'Google Drive', state: 'Planned' },
-  { id: 'dropbox', name: 'Dropbox', state: 'Later' },
-];
-
-const workflow = [
-  { label: 'Import', detail: 'memories_history.json' },
-  { label: 'Repair', detail: 'dates, GPS, sidecars' },
-  { label: 'Upload', detail: 'chosen cloud' },
-  { label: 'Audit', detail: 'proof of transfer' },
-];
-
-const metadataSteps = [
+const whatItDoes = [
   {
-    label: 'Date',
-    source: 'memories_history.json → Date',
-    output: 'filename, file modified time, JPEG DateTimeOriginal',
+    title: 'You bring your Snapchat download',
+    body: 'Use the normal Snapchat data download. MemoryBridge does not need your Snapchat password.',
   },
   {
-    label: 'Location',
-    source: 'memories_history.json → Location',
-    output: 'JPEG GPS tags when coordinates are real, sidecar always',
+    title: 'It finds your memories',
+    body: 'It looks inside the download for your photos, videos, and the list Snapchat includes with each memory.',
   },
   {
-    label: 'Media type',
-    source: 'memories_history.json → Media Type',
-    output: 'photo/video matching against memories/*-main files',
+    title: 'It puts the dates and places back',
+    body: 'If Snapchat included the real date or place, MemoryBridge matches that info to the right photo or video.',
   },
   {
-    label: 'Raw proof',
-    source: 'original Snapchat row',
-    output: '.memorybridge.json sidecar plus run manifest',
+    title: 'You get a clean folder',
+    body: 'Your memories come out with readable names, correct dates, real places when available, and a simple receipt.',
   },
 ];
 
-const productPoints = [
-  {
-    title: 'No Snapchat password',
-    body: 'Users bring their official export. MemoryBridge never asks for account credentials.',
-  },
-  {
-    title: 'Metadata repaired first',
-    body: 'Dates, GPS coordinates, filenames, and sidecars are prepared before any upload starts.',
-  },
-  {
-    title: 'Cloud choice stays open',
-    body: 'Google Photos, OneDrive, Google Drive, and local archive support can share the same queue.',
-  },
-];
-
-const pricing = [
-  { name: 'Free audit', price: '$0', detail: 'Preview export coverage and download the local processor.' },
-  { name: 'One-time rescue', price: '$19', detail: 'Repair one Snapchat export and back it up to one cloud.' },
-  { name: 'Annual vault', price: '$39', detail: 'Run recurring exports, dedupe, and keep a verified archive.' },
+const steps = [
+  { label: 'Download', detail: 'Get your data from Snapchat.' },
+  { label: 'Drop it in', detail: 'Add the export to MemoryBridge.' },
+  { label: 'Clean it up', detail: 'Dates and places are matched to files.' },
+  { label: 'Keep it', detail: 'Save the clean folder wherever you want.' },
 ];
 
 const faqs = [
   {
-    question: 'Where does the metadata come from?',
-    answer: 'From Snapchat’s official memories_history.json file. Each row contains fields like Date, Media Type, and Location, and MemoryBridge maps those fields into timestamps, EXIF, filenames, and sidecars.',
+    question: 'What does MemoryBridge actually do?',
+    answer:
+      'It turns a messy Snapchat data download into a clean folder of photos and videos. It keeps the real dates and places Snapchat included, and it gives you a simple receipt showing what was found.',
   },
   {
-    question: 'Can this pull directly from Snapchat?',
-    answer: 'The product is built around user-provided Snapchat exports, not account scraping or password sharing.',
+    question: 'Where do the dates and places come from?',
+    answer:
+      'They come from a file Snapchat puts inside your download. That file lists each memory with its date, type, and place when Snapchat has one.',
   },
   {
-    question: 'Where does the media go?',
-    answer: 'The local processor keeps files on the user machine until the user chooses a cloud destination.',
+    question: 'Does it guess where a memory was taken?',
+    answer:
+      'No. If Snapchat did not include a real place, MemoryBridge marks it as no place. It does not make up locations.',
   },
   {
-    question: 'What happens when metadata is missing?',
-    answer: 'MemoryBridge preserves what the export contains and writes an audit sidecar for anything it cannot embed.',
+    question: 'Why not just unzip the Snapchat download?',
+    answer:
+      'Because the photos and videos are separate from the list that explains them. MemoryBridge matches them back together so your memories are easier to keep and sort.',
+  },
+  {
+    question: 'Does this log into my Snapchat?',
+    answer:
+      'No. You request your own Snapchat data first, then use MemoryBridge on that download. The app is not a Snapchat login tool.',
+  },
+  {
+    question: 'What if some memories have no place?',
+    answer:
+      'That is normal. Some Snapchat exports say 0,0 instead of a real place. MemoryBridge treats that as blank and keeps the memory anyway.',
+  },
+  {
+    question: 'What do I get at the end?',
+    answer:
+      'A cleaned folder with your photos and videos, names based on their dates, and a receipt file that says how many memories were cleaned.',
   },
 ];
 
-const assetUrl = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
+const assetUrl = (path) => {
+  const cleanPath = path.replace(/^\/+/, '');
+  const base = typeof document === 'undefined' ? import.meta.env.BASE_URL : document.baseURI;
+  return new URL(cleanPath, base).toString();
+};
 
 function locationStatus(value) {
   if (!value || typeof value !== 'string') return 'Missing';
@@ -87,7 +78,7 @@ function locationStatus(value) {
   const lon = Number(matches[1]);
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return 'Invalid';
   if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return 'Invalid';
-  if (lat === 0 && lon === 0) return 'Placeholder';
+  if (lat === 0 && lon === 0) return 'Blank';
   return 'Real';
 }
 
@@ -99,18 +90,16 @@ function coerceItems(raw) {
 }
 
 function summarize(items) {
-  const withUrl = items.filter((item) => item['Media Download Url'] || item.downloadUrl).length;
   const withDate = items.filter((item) => item.Date || item.date).length;
-  const withLocation = items.filter((item) => locationStatus(item.Location || item.location) === 'Real').length;
-  const placeholderLocation = items.filter((item) => locationStatus(item.Location || item.location) === 'Placeholder').length;
+  const withPlace = items.filter((item) => locationStatus(item.Location || item.location) === 'Real').length;
+  const blankPlace = items.filter((item) => locationStatus(item.Location || item.location) === 'Blank').length;
   const videos = items.filter((item) => String(item['Media Type'] || item.type || '').toLowerCase().includes('video')).length;
 
   return {
     total: items.length,
-    withUrl,
     withDate,
-    withLocation,
-    placeholderLocation,
+    withPlace,
+    blankPlace,
     videos,
     photos: Math.max(0, items.length - videos),
   };
@@ -125,7 +114,6 @@ export default function App() {
   const [fileName, setFileName] = useState('');
   const [items, setItems] = useState([]);
   const [error, setError] = useState('');
-  const [selectedProvider, setSelectedProvider] = useState('google_photos');
 
   const summary = useMemo(() => summarize(items), [items]);
   const previewItems = useMemo(() => items.slice(0, 5), [items]);
@@ -142,12 +130,12 @@ export default function App() {
       const parsed = JSON.parse(text);
       const nextItems = coerceItems(parsed);
       if (!nextItems.length) {
-        setError('No Saved Media records were found in this JSON file.');
+        setError('No memory list was found in this file.');
         return;
       }
       setItems(nextItems);
     } catch (readError) {
-      setError(readError instanceof Error ? readError.message : 'Could not read this JSON file.');
+      setError(readError instanceof Error ? readError.message : 'Could not read this file.');
     }
   }
 
@@ -156,47 +144,46 @@ export default function App() {
       <nav className="siteNav" aria-label="Primary">
         <a className="brand" href="#top">MemoryBridge</a>
         <div className="navLinks">
-          <a href="#product">Product</a>
-          <a href="#metadata">Metadata</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#audit">Audit</a>
+          <a href="#does">What it does</a>
+          <a href="#check">Check yours</a>
           <a href="#faq">FAQ</a>
         </div>
-        <a className="navCta" href="#audit">Try audit</a>
+        <a className="navCta" href="#check">Check yours</a>
       </nav>
 
       <header className="hero" id="top" style={{ '--hero-image': `url("${assetUrl('hero-memory-archive.png')}")` }}>
         <div className="heroContent">
-          <p className="eyebrow heroEyebrow">Snap export backup</p>
-          <h1>MemoryBridge</h1>
+          <p className="eyebrow heroEyebrow">For Snapchat Memories</p>
+          <h1>Get your memories out clean.</h1>
           <p className="heroCopy">
-            Rescue Snapchat Memories exports into a clean camera roll with dates, locations, and cloud-ready files.
+            Snapchat gives you a download. MemoryBridge turns it into a simple folder of photos and videos that are
+            easier to keep.
           </p>
           <div className="heroActions">
-            <a className="primaryAction" href="#audit">Audit an export</a>
-            <a className="secondaryAction" href="#processor">See processor</a>
+            <a className="primaryAction" href="#does">See what it does</a>
+            <a className="secondaryAction" href="#faq">Read FAQ</a>
           </div>
           <div className="heroProof" aria-label="Product proof points">
-            <span>Snap export</span>
-            <span>EXIF repair</span>
-            <span>Cloud backup</span>
+            <span>No Snapchat password</span>
+            <span>Keeps real dates</span>
+            <span>Keeps real places</span>
           </div>
         </div>
       </header>
 
-      <section className="introBand" id="product">
+      <section className="introBand" id="does">
         <div>
-          <p className="sectionLabel">Product</p>
-          <h2>For people ready to leave without abandoning years of photos and videos.</h2>
+          <p className="sectionLabel">What it does</p>
+          <h2>Snapchat gives you a pile of files. MemoryBridge makes it make sense.</h2>
         </div>
         <p>
-          Snapchat gives people the export. MemoryBridge makes that export useful: human filenames,
-          restored timestamps, GPS where available, upload-ready files, and a transfer log.
+          Your Snapchat download has photos and videos in one place, and the dates and places in another place.
+          MemoryBridge matches them together and gives you a clean folder.
         </p>
       </section>
 
       <section className="proofGrid" aria-label="MemoryBridge product pillars">
-        {productPoints.map((point) => (
+        {whatItDoes.map((point) => (
           <article className="proofCard" key={point.title}>
             <h3>{point.title}</h3>
             <p>{point.body}</p>
@@ -205,12 +192,12 @@ export default function App() {
       </section>
 
       <section className="workflowBand" aria-label="MemoryBridge workflow">
-        <img src={assetUrl('memory-flow.png')} alt="MemoryBridge export to cloud workflow" />
+        <img src={assetUrl('memory-flow.png')} alt="MemoryBridge export cleanup flow" />
         <div className="workflowCopy">
-          <p className="sectionLabel">Workflow</p>
-          <h2>Export in. Repaired archive out.</h2>
+          <p className="sectionLabel">How it works</p>
+          <h2>Four steps. No mystery.</h2>
           <div className="workflowRows">
-            {workflow.map((step, index) => (
+            {steps.map((step, index) => (
               <div className="workflowRow" key={step.label}>
                 <span>{String(index + 1).padStart(2, '0')}</span>
                 <strong>{step.label}</strong>
@@ -221,67 +208,32 @@ export default function App() {
         </div>
       </section>
 
-      <section className="metadataBand" id="metadata">
+      <section className="simpleBand">
         <div className="sectionIntro">
-          <p className="sectionLabel">Metadata source</p>
-          <h2>Nothing is guessed. The export JSON is the source of truth.</h2>
+          <p className="sectionLabel">The simple version</p>
+          <h2>MemoryBridge does not invent anything.</h2>
           <p>
-            Snapchat ships each memory with a row in <code>memories_history.json</code>. MemoryBridge reads those
-            rows, pairs them with the official <code>memories/*-main</code> media files, then writes the metadata
-            into filenames, file timestamps, JPEG EXIF, and sidecars.
+            If Snapchat included a date, MemoryBridge keeps it. If Snapchat included a real place, MemoryBridge keeps
+            it. If Snapchat only included a blank place like 0,0, MemoryBridge leaves the place blank.
           </p>
         </div>
-        <div className="metadataGrid">
-          {metadataSteps.map((step) => (
-            <article className="metadataCard" key={step.label}>
-              <span>{step.label}</span>
-              <strong>{step.source}</strong>
-              <p>{step.output}</p>
-            </article>
-          ))}
-        </div>
-        <div className="metadataNote">
-          <strong>About 0,0 GPS:</strong>
-          <span>
-            When Snapchat exports <code>Latitude, Longitude: 0.0, 0.0</code>, MemoryBridge preserves that raw value
-            in the sidecar but does not write fake GPS into the image.
-          </span>
-        </div>
       </section>
 
-      <section className="pricingBand" id="pricing">
-        <div className="sectionIntro">
-          <p className="sectionLabel">Pricing</p>
-          <h2>Simple enough for a rescue job. Durable enough for a real product.</h2>
-        </div>
-        <div className="pricingGrid">
-          {pricing.map((plan) => (
-            <article className="priceCard" key={plan.name}>
-              <h3>{plan.name}</h3>
-              <strong>{plan.price}</strong>
-              <p>{plan.detail}</p>
-              <a href="#audit">Start</a>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="topbar" id="audit">
+      <section className="topbar" id="check">
         <div>
-          <p className="eyebrow">Live audit</p>
-          <h2>Check a Snapchat export before you process anything.</h2>
+          <p className="eyebrow">Check yours</p>
+          <h2>See what Snapchat included before cleaning the full download.</h2>
         </div>
-        <a className="downloadLink" href="#processor">Local processor</a>
       </section>
 
-      <section className="workspace" aria-label="MemoryBridge workspace">
+      <section className="workspace" aria-label="MemoryBridge checker">
         <div className="importPanel">
           <div className="panelHeader">
             <div>
-              <p className="sectionLabel">Import</p>
-              <h2>Snapchat export audit</h2>
+              <p className="sectionLabel">Memory list</p>
+              <h2>Choose the Snapchat memory list file</h2>
             </div>
-            <span className={summary.total ? 'status ready' : 'status'}>{summary.total ? 'Ready' : 'Waiting'}</span>
+            <span className={summary.total ? 'status ready' : 'status'}>{summary.total ? 'Found' : 'Waiting'}</span>
           </div>
 
           <label className="dropZone">
@@ -289,49 +241,28 @@ export default function App() {
             <span className="dropIcon" aria-hidden="true">+</span>
             <span>
               <strong>{fileName || 'Choose memories_history.json'}</strong>
-              <small>{summary.total ? `${summary.total.toLocaleString()} records loaded` : 'Parsed locally in your browser'}</small>
+              <small>
+                {summary.total ? `${summary.total.toLocaleString()} memories found` : 'This check runs in your browser'}
+              </small>
             </span>
           </label>
 
           {error && <p className="errorText">{error}</p>}
 
-          <div className="metrics" aria-label="Import metrics">
-            <Metric label="Media" value={summary.total.toLocaleString()} />
-            <Metric label="Dated" value={formatPercent(summary.withDate, summary.total)} />
-            <Metric label="GPS" value={formatPercent(summary.withLocation, summary.total)} />
-            <Metric label="0,0 GPS" value={summary.placeholderLocation.toLocaleString()} />
-            <Metric label="URLs" value={formatPercent(summary.withUrl, summary.total)} />
+          <div className="metrics" aria-label="Memory list numbers">
+            <Metric label="Memories" value={summary.total.toLocaleString()} />
+            <Metric label="With dates" value={formatPercent(summary.withDate, summary.total)} />
+            <Metric label="With places" value={formatPercent(summary.withPlace, summary.total)} />
+            <Metric label="Blank places" value={summary.blankPlace.toLocaleString()} />
+            <Metric label="Videos" value={summary.videos.toLocaleString()} />
           </div>
 
-          <div className="split">
-            <div>
-              <p className="sectionLabel">Cloud target</p>
-              <div className="providerList">
-                {providers.map((provider) => (
-                  <button
-                    className={selectedProvider === provider.id ? 'provider active' : 'provider'}
-                    key={provider.id}
-                    onClick={() => setSelectedProvider(provider.id)}
-                    type="button"
-                  >
-                    <span>{provider.name}</span>
-                    <small>{provider.state}</small>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flowCard">
-              <img src={assetUrl('memory-flow.png')} alt="MemoryBridge local export flow" />
-              <div className="flowSteps">
-                {workflow.map((step) => (
-                  <div className="flowStep" key={step.label}>
-                    <strong>{step.label}</strong>
-                    <span>{step.detail}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="plainResult">
+            <h3>What this means</h3>
+            <p>
+              The full cleaner uses this list to match your Snapchat photos and videos with their dates and places.
+              This preview only checks the list file.
+            </p>
           </div>
         </div>
 
@@ -339,59 +270,45 @@ export default function App() {
           <div className="panelHeader">
             <div>
               <p className="sectionLabel">Preview</p>
-              <h2>Metadata coverage</h2>
+              <h2>First few memories</h2>
             </div>
           </div>
 
           <div className="coverageRows">
-            <Coverage label="Photo records" value={summary.photos} total={summary.total} />
-            <Coverage label="Video records" value={summary.videos} total={summary.total} />
-            <Coverage label="Real GPS records" value={summary.withLocation} total={summary.total} />
-            <Coverage label="0,0 placeholders" value={summary.placeholderLocation} total={summary.total} />
-            <Coverage label="Download links" value={summary.withUrl} total={summary.total} />
+            <Coverage label="Photos" value={summary.photos} total={summary.total} />
+            <Coverage label="Videos" value={summary.videos} total={summary.total} />
+            <Coverage label="Real places" value={summary.withPlace} total={summary.total} />
+            <Coverage label="Blank places" value={summary.blankPlace} total={summary.total} />
           </div>
 
           <div className="previewTable">
             <div className="tableHead">
               <span>Date</span>
               <span>Type</span>
-              <span>GPS</span>
+              <span>Place</span>
             </div>
             {previewItems.length ? (
               previewItems.map((item, index) => {
-                const gpsStatus = locationStatus(item.Location || item.location);
+                const placeStatus = locationStatus(item.Location || item.location);
                 return (
                   <div className="tableRow" key={`${item.Date || item.date || 'row'}-${index}`}>
                     <span>{item.Date || item.date || 'Missing'}</span>
                     <span>{item['Media Type'] || item.type || 'Media'}</span>
-                    <span>{gpsStatus}</span>
+                    <span>{placeStatus}</span>
                   </div>
                 );
               })
             ) : (
-              <div className="emptyState">No export loaded.</div>
+              <div className="emptyState">No file checked yet.</div>
             )}
           </div>
         </aside>
       </section>
 
-      <section className="processorBand" id="processor">
-        <div>
-          <p className="sectionLabel">Processor</p>
-          <h2>Clean-room local engine</h2>
-          <p>
-            The Python tool can process a Snapchat export ZIP directly, scan connected Android public storage for
-            export candidates, name files by capture time, write audit sidecars, write a run manifest, and embed JPEG
-            metadata.
-          </p>
-        </div>
-        <pre><code>cd memorybridge/processor{'\n'}python -m pip install -e .[exif]{'\n'}python -m memorybridge_export android-scan{'\n'}python -m memorybridge_export prepare-zip snapchat-export.zip --out cleaned</code></pre>
-      </section>
-
       <section className="faqBand" id="faq">
         <div className="sectionIntro">
           <p className="sectionLabel">FAQ</p>
-          <h2>The sharp edges, answered plainly.</h2>
+          <h2>Plain answers.</h2>
         </div>
         <div className="faqList">
           {faqs.map((faq) => (
@@ -405,7 +322,7 @@ export default function App() {
 
       <footer className="footer">
         <strong>MemoryBridge</strong>
-        <span>Take the archive with you.</span>
+        <span>Keep the memories. Leave the mess.</span>
         <a href="#top">Back to top</a>
       </footer>
     </main>

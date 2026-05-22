@@ -211,7 +211,7 @@ h3 {
 .introBand,
 .processorBand,
 .workflowBand,
-.metadataBand,
+.simpleBand,
 .pricingBand,
 .faqBand {
   padding-left: max(24px, calc((100vw - 1180px) / 2));
@@ -321,14 +321,14 @@ h3 {
   margin-bottom: 0;
 }
 
-.metadataBand {
+.simpleBand {
   background: #fffdf0;
   border-bottom: 2px solid var(--ink);
   padding-bottom: 52px;
   padding-top: 52px;
 }
 
-.metadataBand .sectionIntro p:last-child {
+.simpleBand .sectionIntro p:last-child {
   color: var(--muted);
   font-size: 1.04rem;
   line-height: 1.58;
@@ -336,14 +336,14 @@ h3 {
   max-width: 780px;
 }
 
-.metadataGrid {
+.infoGrid {
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 24px;
 }
 
-.metadataCard {
+.infoCard {
   background: var(--paper);
   border: 2px solid var(--ink);
   border-radius: 8px;
@@ -351,19 +351,19 @@ h3 {
   padding: 18px;
 }
 
-.metadataCard:nth-child(2) {
+.infoCard:nth-child(2) {
   background: #e3f7ff;
 }
 
-.metadataCard:nth-child(3) {
+.infoCard:nth-child(3) {
   background: #ffe8f2;
 }
 
-.metadataCard:nth-child(4) {
+.infoCard:nth-child(4) {
   background: #e5fff4;
 }
 
-.metadataCard span {
+.infoCard span {
   color: #6b5a00;
   display: block;
   font-size: 0.76rem;
@@ -372,19 +372,19 @@ h3 {
   text-transform: uppercase;
 }
 
-.metadataCard strong {
+.infoCard strong {
   display: block;
   font-size: 1.02rem;
   line-height: 1.28;
 }
 
-.metadataCard p {
+.infoCard p {
   color: var(--muted);
   line-height: 1.48;
   margin: 12px 0 0;
 }
 
-.metadataNote {
+.simpleNote {
   align-items: baseline;
   background: var(--flash);
   border: 2px solid var(--ink);
@@ -395,7 +395,7 @@ h3 {
   padding: 14px 16px;
 }
 
-.metadataNote span {
+.simpleNote span {
   color: #3d3500;
   line-height: 1.45;
 }
@@ -550,6 +550,24 @@ h3 {
   gap: 10px;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   margin: 18px 0;
+}
+
+.plainResult {
+  background: #fffceb;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  margin-top: 16px;
+  padding: 16px;
+}
+
+.plainResult h3 {
+  margin-bottom: 8px;
+}
+
+.plainResult p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 0;
 }
 
 .metric {
@@ -809,7 +827,7 @@ details p {
 
   .introBand,
   .workflowBand,
-  .metadataGrid,
+  .infoGrid,
   .workspace,
   .processorBand,
   .pricingGrid,
@@ -861,7 +879,7 @@ details p {
     grid-template-columns: 1fr;
   }
 
-  .metadataNote {
+  .simpleNote {
     align-items: flex-start;
     flex-direction: column;
   }
