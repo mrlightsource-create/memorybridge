@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.log
+
+user-data/
+
+processor/.pytest_cache/
+processor/src/**/*.egg-info/
+processor/src/**/__pycache__/
+processor/tests/**/__pycache__/

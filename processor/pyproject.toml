@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "memorybridge-export"
+version = "0.1.0"
+description = "Clean-room local processor for Snapchat Memories exports"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+exif = ["Pillow>=10", "piexif>=1.1"]
+test = ["pytest>=8"]
+
+[project.scripts]
+memorybridge = "memorybridge_export.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
