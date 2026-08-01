@@ -11,36 +11,126 @@ permissions:
   contents: read
 
 jobs:
-  full-quaternius-pack:
+  targeted-quaternius-runtime:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Download official Quaternius Pirate Kit folder
+      - name: Download selected official Quaternius Pirate Kit models
         shell: bash
         run: |
-          set -euxo pipefail
+          set -euo pipefail
           python3 -m pip install --quiet gdown
-          mkdir -p /tmp/piratekit
-          gdown --folder --no-cookies \
-            'https://drive.google.com/drive/folders/1KjMzhVsDcyvYMWeVjZcRfuu8auBLpNi2?usp=sharing' \
-            -O /tmp/piratekit
-          echo '--- DOWNLOADED FILES ---'
-          find /tmp/piratekit -maxdepth 5 -type f -printf '%p %s bytes\n' | sort
-          mkdir -p skullwake-quaternius-pirate-kit
-          find /tmp/piratekit -type f \( -iname '*gltf*' -o -iname '*.glb' -o -iname '*.zip' -o -iname '*.png' -o -iname '*.jpg' \) -print0 | \
-            xargs -0 -r -I{} cp --parents '{}' skullwake-quaternius-pirate-kit/
-          cat > skullwake-quaternius-pirate-kit/LICENSE.txt <<'EOF'
+          ROOT="$PWD/skullwake-quaternius-runtime"
+          mkdir -p "$ROOT/models"
+          cat > /tmp/download_models.py <<'PY'
+          import pathlib, subprocess, time
+
+          root = pathlib.Path('skullwake-quaternius-runtime/models')
+          assets = {
+            'Atlas_Pirate.png': '1bLKM6Nm_jTtXJN0CVK0GNqHto3eMGn6r',
+            'Environment_Cliff1.gltf': '1PQXp1HGkKv75DxGbw_tvjpcpiX7t8s4R',
+            'Environment_Cliff2.gltf': '1L34oRW5Inbeqx9MRR1n74bhQiiRHveqk',
+            'Environment_Cliff3.gltf': '1YTzUWqOJznzURlI1TGl6jMsGNdS8AyYu',
+            'Environment_Cliff4.gltf': '1HGcISs9Kh35_BP0xktaF-qrxyqNOCLR_',
+            'Environment_Dock.gltf': '1s_Nf0uuUr2l-aGWJUQhYb00FSqBubSq1',
+            'Environment_Dock_Broken.gltf': '1mAlCOsEummes9cQqzJktuHQBZZXly_l0',
+            'Environment_Dock_Pole.gltf': '1um2OgeTm1aDwaLp9-bzGXMy6X9uMl0wG',
+            'Environment_House1.gltf': '1jdC55RZt2vBaU6yKKUfULu049N6bttF6',
+            'Environment_House2.gltf': '1vJz4IQB0Fj0HaV6trv9DcHH2Al1mQF6J',
+            'Environment_House3.gltf': '1ERoGrN_2mrznW950ljlsvmYJRhyiV5_p',
+            'Environment_LargeBones.gltf': '1XMsbHsdHOZXVjPdFgtlnAvU49Pxlctec',
+            'Environment_PalmTree_1.gltf': '18Q8BCUIUOpb4qmZrKEy13F7sQPu8M5ST',
+            'Environment_PalmTree_2.gltf': '1DAzIhuOcUBZQA_3ge9MYy3wmtjtl5fSw',
+            'Environment_PalmTree_3.gltf': '1eF4XtSNY08kk1hlRVg_-WPBy7GALTjLA',
+            'Environment_Rock_1.gltf': '1Agk58yl3i7Q_reKzdSbb14YGVZxKya5g',
+            'Environment_Rock_2.gltf': '129Oy6SIdcUgsUvSxKz-Teue6rXO_nH92',
+            'Environment_Rock_3.gltf': '1ZgpQDme1g5STjfj0bbzq5X4Rbnn-_ZMi',
+            'Environment_Rock_4.gltf': '1Ce6fVwQZGxleWRFnrNBOmh119FozKIwl',
+            'Environment_Rock_5.gltf': '1cWJHr-w1QtFhxm0CpRQAUeFhbrL-o6yE',
+            'Environment_Sawmill.gltf': '1z-GP4krqozPJURldde4NNAa3si2RBs5x',
+            'Environment_Skulls.gltf': '1J-7fgZKQJnHNxZ0pE1iLDUbD_ZtDehe-',
+            'Prop_Anchor.gltf': '1BrxKp3juHV7C-74LVzDEJLtsBRxqZ2Fg',
+            'Prop_Barrel.gltf': '1afnIEj6hYtj2fkVLDpp1zyZdoWwZUmnR',
+            'Prop_Bomb.gltf': '1Vq3gDOGdARl659nQEjit1I02xhpnXVLn',
+            'Prop_Cannon.gltf': '1uH_g9lnqqOlq-lIcRblcptsBrwA8dtMw',
+            'Prop_CannonBall.gltf': '1ppH0S1DuGFpsoyYC_43cPhuZmGgSCpxC',
+            'Prop_Chest_Closed.gltf': '1__qGmoEib1C9EQgPtK3pny7sSKfE-YUd',
+            'Prop_Chest_Gold.gltf': '1v-Drn2LxmpoSL6vUlJ83DdvYY-6fyorA',
+            'Prop_Coins.gltf': '1lVm2myTDmMVm7dSvqZq6F_GftLAz09dh',
+            'Prop_GoldBag.gltf': '1PPh96N1VyRjxJvF9EjLI_7ka-6PZDwkH',
+            'Prop_Skull.gltf': '1EMz4SEdR8Qm1zL6xYM75-yG8uAndMeNo',
+            'Ship_Large.gltf': '185_TUcJiwB_4vz7aRr4u6wiASODTk0ZS',
+            'Ship_Small.gltf': '1ScqR_EdqqJkOwU7Z51kNrI41y0klDzkg',
+            'UI_Gold.gltf': '1iGEdTMDaZ4o2p8VrAaJm6p2OQAv_uBlT',
+            'UI_Swords.gltf': '1uFtIAQt6y988vqIGGDKFIpMglDwBHqDD',
+            'Weapon_AxeRifle.gltf': '1IwpeEdclfux3wED3jpFI-GE8_V6yKAvR',
+            'Weapon_Cutlass.gltf': '1Po6yti96WXeSXRNKVKe1xM0DQMH4-1xu',
+            'Weapon_DoubleShotgun.gltf': '11f7N7HXHEer95xuHk3-R9C40RRC8zCfH',
+            'Weapon_Pistol.gltf': '1xZvGswHWu-NBBCeKKOlkCcE_tD_wwErb',
+            'Weapon_Rifle.gltf': '1sN3ubuWEgRuRe7BRU97TQJcTKgBX6c_Z',
+            'Weapon_Sword_1.gltf': '1YeOBcmbUwwXkGNtkxMmVxoJixIUP1BJ2',
+            'Weapon_Sword_2.gltf': '1QUNSmm02Oh9yE80vqDi7xaeb1mVyV9sy',
+          }
+
+          failures = []
+          for index, (name, file_id) in enumerate(assets.items(), 1):
+              dest = root / name
+              ok = False
+              for attempt in range(1, 5):
+                  print(f'[{index}/{len(assets)}] {name} attempt {attempt}', flush=True)
+                  result = subprocess.run(
+                      ['gdown', '--no-cookies', file_id, '-O', str(dest)],
+                      text=True,
+                  )
+                  if result.returncode == 0 and dest.exists() and dest.stat().st_size > 100:
+                      ok = True
+                      break
+                  time.sleep(4 * attempt)
+              if not ok:
+                  failures.append(name)
+              time.sleep(1.25)
+
+          if failures:
+              raise SystemExit('Failed downloads: ' + ', '.join(failures))
+          PY
+          python3 /tmp/download_models.py
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('skullwake-quaternius-runtime/models')
+          files = sorted(root.iterdir())
+          assert len(files) >= 40, len(files)
+          atlas = root / 'Atlas_Pirate.png'
+          assert atlas.read_bytes()[:8] == b'\x89PNG\r\n\x1a\n'
+          report = []
+          for path in files:
+              if path.suffix == '.gltf':
+                  data = json.loads(path.read_text())
+                  uris = [b.get('uri') for b in data.get('buffers', [])]
+                  images = [i.get('uri') for i in data.get('images', [])]
+                  missing = [u for u in uris + images if u and not u.startswith('data:') and not (root / u).exists()]
+                  if missing:
+                      raise SystemExit(f'{path.name} missing external refs: {missing}')
+                  report.append({'file': path.name, 'bytes': path.stat().st_size, 'embedded_buffers': all(not u or u.startswith('data:') for u in uris), 'images': images})
+          (Path('skullwake-quaternius-runtime') / 'inspection.json').write_text(json.dumps(report, indent=2))
+          print(f'validated {len(report)} glTF models')
+          PY
+
+          cat > "$ROOT/LICENSE.txt" <<'EOF'
           Quaternius Pirate Kit
+          Creator: Quaternius
           Official source: https://quaternius.com/packs/piratekit.html
-          Download folder: https://drive.google.com/drive/folders/1KjMzhVsDcyvYMWeVjZcRfuu8auBLpNi2
+          Official download folder: https://drive.google.com/drive/folders/1KjMzhVsDcyvYMWeVjZcRfuu8auBLpNi2
           License: CC0 1.0 Universal
           EOF
-      - name: Upload full single-pack source
+
+      - name: Upload targeted single-pack runtime
         uses: actions/upload-artifact@v4
         with:
-          name: skullwake-quaternius-pirate-kit
-          path: skullwake-quaternius-pirate-kit
+          name: skullwake-quaternius-runtime
+          path: skullwake-quaternius-runtime
           if-no-files-found: error
-          compression-level: 1
+          compression-level: 4
           retention-days: 1
