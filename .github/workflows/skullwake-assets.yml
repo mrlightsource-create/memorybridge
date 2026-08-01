@@ -11,19 +11,36 @@ permissions:
   contents: read
 
 jobs:
-  inspect-downloads:
+  full-quaternius-pack:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect Quaternius and Creatus download endpoints
+      - name: Download official Quaternius Pirate Kit folder
         shell: bash
         run: |
           set -euxo pipefail
-          curl -A 'Mozilla/5.0' -L --fail -o /tmp/poly.html 'https://poly.pizza/bundle/Pirate-kit-0q5ulmIYqQ'
-          echo '--- POLY URLS ---'
-          grep -Eoi 'https?[^"<> ]+' /tmp/poly.html | sed 's/&amp;/\&/g' | grep -Ei 'download|gltf|glb|zip|bundle|static' | head -200 || true
-          echo '--- POLY DOWNLOAD CONTEXT ---'
-          grep -Ein 'download|gltf|zip|0q5ulmIYqQ' /tmp/poly.html | head -200 || true
-          curl -A 'Mozilla/5.0' -L --fail -o /tmp/itch.html 'https://creatus.itch.io/creatus-pirate/purchase'
-          echo '--- ITCH CONTEXT ---'
-          grep -Ein 'download|upload|file|Creatus_Pack_Pirate' /tmp/itch.html | head -200 || true
+          python3 -m pip install --quiet gdown
+          mkdir -p /tmp/piratekit
+          gdown --folder --remaining-ok --no-cookies \
+            'https://drive.google.com/drive/folders/1KjMzhVsDcyvYMWeVjZcRfuu8auBLpNi2?usp=sharing' \
+            -O /tmp/piratekit
+          echo '--- DOWNLOADED FILES ---'
+          find /tmp/piratekit -maxdepth 4 -type f -printf '%p %s bytes\n' | sort
+          mkdir -p skullwake-quaternius-pirate-kit
+          find /tmp/piratekit -type f \( -iname '*gltf*' -o -iname '*.glb' -o -iname '*.zip' -o -iname '*.png' -o -iname '*.jpg' \) -print0 | \
+            xargs -0 -I{} cp --parents '{}' skullwake-quaternius-pirate-kit/
+          cat > skullwake-quaternius-pirate-kit/LICENSE.txt <<'EOF'
+          Quaternius Pirate Kit
+          Official source: https://quaternius.com/packs/piratekit.html
+          Download folder: https://drive.google.com/drive/folders/1KjMzhVsDcyvYMWeVjZcRfuu8auBLpNi2
+          License: CC0 1.0 Universal
+          EOF
+      - name: Upload full single-pack source
+        uses: actions/upload-artifact@v4
+        with:
+          name: skullwake-quaternius-pirate-kit
+          path: skullwake-quaternius-pirate-kit
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 1
