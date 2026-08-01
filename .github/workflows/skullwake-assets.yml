@@ -11,84 +11,19 @@ permissions:
   contents: read
 
 jobs:
-  package-assets:
+  inspect-downloads:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download licensed runtime and 3D assets
+      - name: Inspect Quaternius and Creatus download endpoints
         shell: bash
         run: |
-          set -euo pipefail
-          ROOT="$PWD/skullwake-3d-runtime"
-          CHAR="$ROOT/assets/characters"
-          KEN="$ROOT/assets/kenney"
-          VENDOR="$ROOT/vendor"
-          mkdir -p "$CHAR" "$KEN/Textures" "$VENDOR"
-
-          SCUTTLE="https://raw.githubusercontent.com/JoshKappler/scuttle/4aed63156c37f6879838a48510b15a8ef88f0261/public/assets/characters"
-          for f in captain anne henry mako sharky skeleton; do
-            curl --fail --location --retry 4 --output "$CHAR/$f.glb" "$SCUTTLE/$f.glb"
-          done
-
-          KBASE="https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb"
-          curl --fail --location --retry 4 --output "$KEN/Textures/colormap.png" "$KBASE/Textures/colormap.png"
-          for f in \
-            boat-row-small boat-row-large ship-small ship-pirate-small ship-pirate-medium \
-            ship-pirate-large ship-ghost ship-wreck cannon cannon-mobile cannon-ball barrel chest crate \
-            flag-pirate-high flag-high palm-detailed-straight palm-detailed-bend \
-            rocks-sand-a rocks-sand-b rocks-sand-c structure-platform-dock \
-            tower-complete-large tower-watch structure structure-roof patch-sand \
-            patch-sand-foliage grass-patch platform-planks structure-fence; do
-            curl --fail --location --retry 4 --output "$KEN/$f.glb" "$KBASE/$f.glb"
-          done
-
-          curl --fail --location --retry 4 --output "$VENDOR/three.min.js" \
-            https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js
-          curl --fail --location --retry 4 --output "$VENDOR/GLTFLoader.js" \
-            https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/js/loaders/GLTFLoader.js
-          curl --fail --location --retry 4 --output "$VENDOR/SkeletonUtils.js" \
-            https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/js/utils/SkeletonUtils.js
-
-          cat > "$ROOT/LICENSES.md" <<'EOF'
-          # Third-party asset licenses
-
-          ## Quaternius Pirate Kit
-          - Creator: Quaternius
-          - Source: https://quaternius.com/packs/piratekit.html
-          - License: CC0 1.0 Universal
-          - Files used: animated pirate and skeleton GLB characters.
-
-          ## Kenney Pirate Kit
-          - Creator: Kenney
-          - Source: https://kenney.nl/assets/pirate-kit
-          - License: CC0 1.0 Universal
-          - Files used: vessels, cannons, fort pieces, props, vegetation and rocks.
-
-          ## Three.js
-          - Source: https://threejs.org/
-          - License: MIT
-          - Version: r128
-          EOF
-
-          python3 - <<'PY'
-          from pathlib import Path
-          root=Path('skullwake-3d-runtime')
-          glbs=list(root.rglob('*.glb'))
-          assert len(glbs)>=30, len(glbs)
-          for p in glbs:
-              b=p.read_bytes()
-              assert b[:4] == b'glTF', (p, b[:4])
-              assert len(b)>1000, (p, len(b))
-          for p in [root/'vendor/three.min.js', root/'vendor/GLTFLoader.js', root/'vendor/SkeletonUtils.js']:
-              assert p.stat().st_size>1000, (p, p.stat().st_size)
-          print(f'validated {len(glbs)} GLBs')
-          PY
-
-      - name: Upload Skullwake 3D runtime assets
-        uses: actions/upload-artifact@v4
-        with:
-          name: skullwake-3d-runtime
-          path: skullwake-3d-runtime
-          if-no-files-found: error
-          compression-level: 6
-          retention-days: 1
+          set -euxo pipefail
+          curl -A 'Mozilla/5.0' -L --fail -o /tmp/poly.html 'https://poly.pizza/bundle/Pirate-kit-0q5ulmIYqQ'
+          echo '--- POLY URLS ---'
+          grep -Eoi 'https?[^"<> ]+' /tmp/poly.html | sed 's/&amp;/\&/g' | grep -Ei 'download|gltf|glb|zip|bundle|static' | head -200 || true
+          echo '--- POLY DOWNLOAD CONTEXT ---'
+          grep -Ein 'download|gltf|zip|0q5ulmIYqQ' /tmp/poly.html | head -200 || true
+          curl -A 'Mozilla/5.0' -L --fail -o /tmp/itch.html 'https://creatus.itch.io/creatus-pirate/purchase'
+          echo '--- ITCH CONTEXT ---'
+          grep -Ein 'download|upload|file|Creatus_Pack_Pirate' /tmp/itch.html | head -200 || true
