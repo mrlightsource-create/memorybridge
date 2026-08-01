@@ -22,14 +22,14 @@ jobs:
           set -euxo pipefail
           python3 -m pip install --quiet gdown
           mkdir -p /tmp/piratekit
-          gdown --folder --remaining-ok --no-cookies \
+          gdown --folder --no-cookies \
             'https://drive.google.com/drive/folders/1KjMzhVsDcyvYMWeVjZcRfuu8auBLpNi2?usp=sharing' \
             -O /tmp/piratekit
           echo '--- DOWNLOADED FILES ---'
-          find /tmp/piratekit -maxdepth 4 -type f -printf '%p %s bytes\n' | sort
+          find /tmp/piratekit -maxdepth 5 -type f -printf '%p %s bytes\n' | sort
           mkdir -p skullwake-quaternius-pirate-kit
           find /tmp/piratekit -type f \( -iname '*gltf*' -o -iname '*.glb' -o -iname '*.zip' -o -iname '*.png' -o -iname '*.jpg' \) -print0 | \
-            xargs -0 -I{} cp --parents '{}' skullwake-quaternius-pirate-kit/
+            xargs -0 -r -I{} cp --parents '{}' skullwake-quaternius-pirate-kit/
           cat > skullwake-quaternius-pirate-kit/LICENSE.txt <<'EOF'
           Quaternius Pirate Kit
           Official source: https://quaternius.com/packs/piratekit.html
