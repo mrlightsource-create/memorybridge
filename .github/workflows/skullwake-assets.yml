@@ -45,9 +45,9 @@ jobs:
           curl --fail --location --retry 4 --output "$VENDOR/three.min.js" \
             https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js
           curl --fail --location --retry 4 --output "$VENDOR/GLTFLoader.js" \
-            https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js
+            https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/js/loaders/GLTFLoader.js
           curl --fail --location --retry 4 --output "$VENDOR/SkeletonUtils.js" \
-            https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/utils/SkeletonUtils.js
+            https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/js/utils/SkeletonUtils.js
 
           cat > "$ROOT/LICENSES.md" <<'EOF'
           # Third-party asset licenses
