@@ -1,0 +1,51 @@
+# Temporary Skullwake asset retrieval links
+
+This temporary file exists only to expose exact public download URLs for the build pipeline. All third-party game assets below are CC0 and retain their original source notices.
+
+## Quaternius Pirate Kit animated characters (CC0)
+
+- [captain.glb](https://raw.githubusercontent.com/JoshKappler/scuttle/4aed63156c37f6879838a48510b15a8ef88f0261/public/assets/characters/captain.glb)
+- [anne.glb](https://raw.githubusercontent.com/JoshKappler/scuttle/4aed63156c37f6879838a48510b15a8ef88f0261/public/assets/characters/anne.glb)
+- [henry.glb](https://raw.githubusercontent.com/JoshKappler/scuttle/4aed63156c37f6879838a48510b15a8ef88f0261/public/assets/characters/henry.glb)
+- [mako.glb](https://raw.githubusercontent.com/JoshKappler/scuttle/4aed63156c37f6879838a48510b15a8ef88f0261/public/assets/characters/mako.glb)
+- [sharky.glb](https://raw.githubusercontent.com/JoshKappler/scuttle/4aed63156c37f6879838a48510b15a8ef88f0261/public/assets/characters/sharky.glb)
+- [skeleton.glb](https://raw.githubusercontent.com/JoshKappler/scuttle/4aed63156c37f6879838a48510b15a8ef88f0261/public/assets/characters/skeleton.glb)
+
+## Kenney Pirate Kit environment and vessels (CC0)
+
+- [colormap.png](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/Textures/colormap.png)
+- [boat-row-small.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/boat-row-small.glb)
+- [boat-row-large.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/boat-row-large.glb)
+- [ship-small.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/ship-small.glb)
+- [ship-pirate-small.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/ship-pirate-small.glb)
+- [ship-pirate-medium.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/ship-pirate-medium.glb)
+- [ship-pirate-large.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/ship-pirate-large.glb)
+- [ship-ghost.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/ship-ghost.glb)
+- [ship-wreck.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/ship-wreck.glb)
+- [cannon.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/cannon.glb)
+- [cannon-mobile.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/cannon-mobile.glb)
+- [cannon-ball.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/cannon-ball.glb)
+- [barrel.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/barrel.glb)
+- [chest.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/chest.glb)
+- [crate.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/crate.glb)
+- [flag-pirate-high.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/flag-pirate-high.glb)
+- [flag-high.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/flag-high.glb)
+- [palm-detailed-straight.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/palm-detailed-straight.glb)
+- [palm-detailed-bend.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/palm-detailed-bend.glb)
+- [rocks-sand-a.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/rocks-sand-a.glb)
+- [rocks-sand-b.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/rocks-sand-b.glb)
+- [rocks-sand-c.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/rocks-sand-c.glb)
+- [structure-platform-dock.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/structure-platform-dock.glb)
+- [tower-complete-large.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/tower-complete-large.glb)
+- [tower-watch.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/tower-watch.glb)
+- [structure.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/structure.glb)
+- [structure-roof.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/structure-roof.glb)
+- [patch-sand.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/patch-sand.glb)
+- [patch-sand-foliage.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/patch-sand-foliage.glb)
+- [grass-patch.glb](https://raw.githubusercontent.com/MolochDaGod/grudge-arena/44dd77449ff27bd54bba55e343c07ca2673898d3/public/assets/island/pirate-kit/glb/grass-patch.glb)
+
+## Three.js runtime (MIT)
+
+- [three.min.js](https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js)
+- [GLTFLoader.js](https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js)
+- [SkeletonUtils.js](https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/utils/SkeletonUtils.js)
