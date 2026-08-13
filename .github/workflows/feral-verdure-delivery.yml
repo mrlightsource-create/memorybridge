@@ -1,0 +1,40 @@
+name: Publish temporary Feral Verdure delivery mirror
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/feral-verdure-delivery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Download and verify build
+        env:
+          SIGNED_URL: 'https://release-assets.githubusercontent.com/github-production-release-asset/1239456625/8911ed7f-9827-4ee5-842b-060128949710?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-08-13T22%3A06%3A28Z&rscd=attachment%3B+filename%3DFeral_Verdure_0.13.0_Visual_Rebuild_macOS.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-08-13T21%3A06%3A08Z&ske=2026-08-13T22%3A06%3A28Z&sks=b&skv=2018-11-09&sig=RlUYnJlNNhJ4iMXZk3SlsOV5NU%2Bqs4c494TPuTVw7S4%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4NjY1ODg3OCwibmJmIjoxNzg2NjU1Mjc4LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.cWPlRywZI8AvPtw2gq4duaFf8S_Aw3H56vvelotqgWI&response-content-disposition=attachment%3B%20filename%3DFeral_Verdure_0.13.0_Visual_Rebuild_macOS.zip&response-content-type=application%2Foctet-stream'
+          EXPECTED_SHA256: '51eb8a3a24ee897df0746bcf57935b8347188bc6ea16764f150a970f1485fd61'
+          EXPECTED_BYTES: '212652250'
+        run: |
+          set -euo pipefail
+          FILE=Feral_Verdure_0.13.0_Visual_Rebuild_macOS.zip
+          curl --fail --location --retry 4 --retry-delay 2 "$SIGNED_URL" -o "$FILE"
+          test "$(stat -c '%s' "$FILE")" = "$EXPECTED_BYTES"
+          ACTUAL=$(sha256sum "$FILE" | awk '{print $1}')
+          test "$ACTUAL" = "$EXPECTED_SHA256"
+          unzip -tq "$FILE"
+
+      - name: Publish public delivery release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG=feral-verdure-0.13-delivery
+          FILE=Feral_Verdure_0.13.0_Visual_Rebuild_macOS.zip
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG"             --repo "$GITHUB_REPOSITORY"             --target "$GITHUB_SHA"             --title "Feral Verdure 0.13.0 macOS delivery"             --notes "Public delivery mirror for the verified macOS visual rebuild. SHA-256: 51eb8a3a24ee897df0746bcf57935b8347188bc6ea16764f150a970f1485fd61"             "$FILE"
