@@ -1,0 +1,52 @@
+name: Temporary corrected Feral Verdure materialization
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/feral-verdure-corrected-materialize.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: temporary-feral-verdure-corrected-materialization
+  cancel-in-progress: true
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Download and independently verify corrected signed bytes
+        run: |
+          set -euo pipefail
+          mkdir -p delivery
+          SIGNED_URL='https://release-assets.githubusercontent.com/github-production-release-asset/1239456625/d36d2630-1cda-4ef9-b61c-dc90332402d3?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-08-13T16%3A20%3A33Z&rscd=attachment%3B+filename%3DFeral_Verdure_Native_macOS.zip&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-08-13T15%3A20%3A00Z&ske=2026-08-13T16%3A20%3A33Z&sks=b&skv=2018-11-09&sig=ypnPyQRj%2F7Yt1Hbuvt9WbOPxR%2FtITSjWuhCLUJxHBZM%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4NjYzOTQ1OSwibmJmIjoxNzg2NjM1ODU5LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.3wRI5YRBlYj2VBZcexPe_3-szwcsU6LImY5_vWycIvY&response-content-disposition=attachment%3B%20filename%3DFeral_Verdure_Native_macOS.zip&response-content-type=application%2Foctet-stream'
+          APP='delivery/Feral_Verdure_Native_0.12.1_AdHocSigned_macOS.zip'
+          curl --fail --location --retry 5 --retry-delay 2 "$SIGNED_URL" --output "$APP"
+          test -s "$APP"
+          EXPECTED='d704412dd33252ce808e69817fb31f8cb9e7186930faadb95a6085a91952b705'
+          ACTUAL=$(sha256sum "$APP" | awk '{print $1}')
+          test "$ACTUAL" = "$EXPECTED"
+          test "$(stat -c '%s' "$APP")" = '106491382'
+          unzip -tq "$APP"
+          unzip -l "$APP" > delivery/macos_zip_listing.txt
+          grep -q 'Contents/MacOS/' delivery/macos_zip_listing.txt
+          grep -q 'Contents/_CodeSignature/CodeResources' delivery/macos_zip_listing.txt
+          if grep -Eiq '\.(html|js|mjs|wasm)([[:space:]]|$)' delivery/macos_zip_listing.txt; then
+            echo 'Browser runtime detected.' >&2
+            exit 1
+          fi
+          printf '%s  %s\n' "$ACTUAL" "$(basename "$APP")" > delivery/SHA256.txt
+          printf 'status=verified\nbytes=106491382\nsha256=%s\nsigning=Godot built-in ad-hoc bundle signature\n' "$ACTUAL" > delivery/VERIFICATION.txt
+
+      - name: Upload corrected build for chat materialization
+        uses: actions/upload-artifact@v4
+        with:
+          name: Feral-Verdure-Corrected-Signed-Materialization
+          path: delivery
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
